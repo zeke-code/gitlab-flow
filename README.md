@@ -85,6 +85,8 @@ We need to be aligned on the standard for version tagging. We could utilize
   which version of our code is running. Gradle/Maven tasks or CI/CD pipelines to automatically bump our versions MUST be written to reduce human errors.
   Using GitLab issues, releases and milestones to track our releases/hotfixes could also improve our workflow by providing a clear and direct perspective on our
   code state and urgent problems.
+- At the moment, we are not using version tagging for our Helm final chart. I think we should start doing this to keep a better track of our changes
+  and to enable easier rollbacks.
 
 ### Continuos Testing and automated merge requests
 
@@ -103,14 +105,15 @@ This is a draft about how I would deal with all the problems considered above:
 2. **Easier CI/CD process for hotfixes** - create a easier CI/CD process for hotfixes. Tagging a commit on staging or production branch with _hotfix_ would automatically
    bump our minor version and then deploy the code once tests are passed.
 3. **Organization of internal libraries and dependencies in a monorepo** - this would improve their tracking and reduce errors. This would require a lot of effort at the moment.
-4. **Utilize Semantic Versioning** - utilizing semantic versioning to track our code changes, using Z (X.Y.Z) for hotfixes only. Creation of Maven/Gradle tasks for automatic version bumping
+4. **Utilize Semantic Versioning** - utilizing semantic versioning to track our code changes, using Z (X.Y.Z) for hotfixes only.
+   Creation of Maven/Gradle tasks and CI/CD pipelines for automatic version bumping of our microservices and Helm charts.
 5. **Enable CI/CD process every step of the way** - run tests and build process for EVERY branch to catch bugs earlier.
 6. **Utilization of ArgoCD and RenovateBot** - setting up _ArgoCD_ to observe our Helm final template (and committing our
    helm template each step of the way into a repo) would make rollbacks easier, and it would provide a clearer and faster understanding of the current state
    of our code. The utilization of _ArgoCD_ also favors (**GitOps**)[https://www.redhat.com/en/topics/devops/what-is-gitops#gitops-workflows].
    Utilizing _RenovateBot_ also seems essential to track all our dependencies and to spot security issues as well,
    enhancing security of our application and reducing human errors, keeping every microservice aligned.
-   - A nightly Renovate job or deploying it in a Kubernetes pod is enough and is a low cost solution.
+   - A nightly Renovate job or deploying it in a Kubernetes pod or virtual machine is enough and is a low cost solution.
 
 ## Final Workflow
 
@@ -150,7 +153,7 @@ Here’s the proposed SDLC process:
 6. **Dependency Management**
 
    - Use RenovateBot for dependency updates in a shared monorepo.
-   - Automatic dependency upgrades tested nightly.
+   - Automatic nightly or constant dependency upgrades.
 
 7. **Rollback Mechanism**
 
