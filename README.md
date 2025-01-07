@@ -106,7 +106,7 @@ Questo è un abbozzo di come affrontare i problemi descritti:
 2. **Processo CI/CD semplificato per gli hotfix**  
    Creare un processo CI/CD più rapido per gli hotfix. Taggare un commit su `staging` o `production` con _hotfix_ dovrebbe incrementare automaticamente la minor version e distribuire il codice una volta superati i test.
 
-3. **Organizzazione delle librerie e dipendenze interne in un monorepo**  
+3. **Organizzazione delle librerie e dipendenze interne in un monorepo o registro**  
    Questo migliorerebbe il tracciamento e ridurrebbe gli errori, ma richiederebbe uno sforzo iniziale significativo.
 
 4. **Utilizzo del Semantic Versioning**  
@@ -114,13 +114,13 @@ Questo è un abbozzo di come affrontare i problemi descritti:
    Creazione di task Maven/Gradle e pipeline CI/CD per l’incremento automatico delle versioni dei microservizi e dei chart Helm.
 
 5. **Abilitare processi CI/CD in ogni fase**  
-   Eseguire test e build su ogni branch e Merge Request per individuare bug precocemente.
+   Eseguire test e build su OGNI Merge Request per individuare bug il prima possibile.
 
 6. **Utilizzo di ArgoCD e RenovateBot**  
    - Configurare **ArgoCD** per osservare i template Helm finali, impegnandoli in un repository per rendere i rollback più semplici.  
-     L’utilizzo di ArgoCD promuove anche [**GitOps**](https://www.redhat.com/en/topics/devops/what-is-gitops#gitops-workflows).
+     L’utilizzo di ArgoCD promuove anche l'approccio di [**GitOps**](https://www.redhat.com/en/topics/devops/what-is-gitops#gitops-workflows).
    - Configurare **RenovateBot** per monitorare le dipendenze, segnalare vulnerabilità e mantenere i microservizi aggiornati.  
-     - Un job notturno di Renovate o la sua esecuzione in un pod Kubernetes è sufficiente e a basso costo.
+     - Un job notturno di Renovate o la sua esecuzione in un pod Kubernetes è una soluzione sufficiente e a basso costo.
 
 ---
 
