@@ -182,7 +182,7 @@ graph TD;
 
    - For critical issues, create `hotfix/<issue-id>` from `production`.
    - CI validates and deploys directly to production after tests pass.
-   - Hotfix is backported to `staging` and `dev` to sync environments.
+   - Hotfix is backported (merging hotfix branch) to `staging` and `dev` to sync environments.
 
 ```mermaid
 graph TD;
