@@ -55,6 +55,9 @@ making debugging and tracking of the issues easier.
 - Each branch should directly reflect the code running on the environment it corresponds. This approach also enables
   for easier hotfixes in non-dev environments like production and staging.
 
+<img width="611" alt="gitlab_flow" src="https://github.com/user-attachments/assets/6ee43282-af78-4315-8b61-de9f672aea31" />
+
+
 ### Possibility for fast hotfixes
 
 We need to introduce the possibility to make fast fixes in case we find a critical bug in any section of our SDLC.
