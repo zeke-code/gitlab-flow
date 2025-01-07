@@ -92,7 +92,7 @@ Le Merge Request dovrebbero garantire che il codice superi un "quality gate" pri
 
 ---
 
-## Soluzioni Possibili
+## Possibili Soluzioni
 
 Questo è un abbozzo di come affrontare i problemi descritti:
 
