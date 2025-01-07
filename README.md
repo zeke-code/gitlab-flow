@@ -60,7 +60,7 @@ making debugging and tracking of the issues easier.
 We need to introduce the possibility to make fast fixes in case we find a critical bug in any section of our SDLC.
 We could make a simpler CI/CD process for faster deployment, by skipping directly our dev or staging environments.
 
-### Utilization of a monorepo
+### Utilization of a monorepo or registry
 
 In my case, the project is split into _several_ different repos, even though the microservices
 are tightly interconnected with each other. We could improve our workflow by making a monorepo for our project, although it does
@@ -82,15 +82,15 @@ We need to be aligned on the standard for version tagging. We could utilize
   - **Z** MUST be incremented if only backward compatible bug fixes are introduced. A bug fix is defined as an internal change that fixes incorrect behavior.
 - Tagging our versions based on the environment they are deployed in could also be considered (for example v0.0.1-staging), although it could cause possible
   confusions when applying hotfixes and tracking dependencies. **Semantic Versioning** should be enough, and it easily gives the team an understanding of
-  which version of our code is running. Gradle/Maven tasks or CI/CD pipelines to automatically bump our versions MUST be written to reduce human errors.
+  which version of our code is running. **Gradle/Maven tasks or CI/CD pipelines to automatically bump our versions MUST be written to reduce human errors**.
   Using GitLab issues, releases and milestones to track our releases/hotfixes could also improve our workflow by providing a clear and direct perspective on our
   code state and urgent problems.
 - At the moment, we are not using version tagging for our Helm final chart. I think we should start doing this to keep a better track of our changes
   and to enable easier rollbacks.
 
-### Continuos Testing and automated merge requests
+### Continuos Testing and Automated Merge Requests
 
-Our CI/CD processes could be improved to run tests on EVERY branch and Merge Request. This should catch bugs and build errors early
+Our CI/CD processes could be improved to run tests on EVERY Merge Request. This should catch bugs and build errors early
 to improve code quality at every step of the way (although it also means more costs regarding runners and computation). Merge Requests should make sure that
 the code passes a quality gate, and only then it is merged. From dev to staging it can be automatic, but from staging to production we can require manual input.
 
@@ -164,7 +164,7 @@ graph TD;
 4. **Production Environment**
 
    - Approved changes are merged to `production` via Merge Request.
-   - CI/CD deploys to production with a semantic version tag (e.g., `vX.Y.Z`).
+   - CI/CD deploys to production.
    - Monitoring and logging systems ensure stability.
 
 ```mermaid
