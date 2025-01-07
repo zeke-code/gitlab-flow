@@ -6,152 +6,393 @@ La traduzione potrebbe contenere errori di battitura, traduzione, o altro. Più 
 
 ## Indice
 
-0. [Introduzione](#introduzione)
-1. [Il Nostro Caso](#il-nostro-caso)
-2. [Passi Già Intrapresi e Dove Possiamo Migliorare](#passi-già-intrapresi-e-dove-possiamo-migliorare)
-   - [Separazione per Ambiente, Funzionalità e Fix](#separazione-per-ambiente-funzionalità-e-fix)
-   - [Hotfix Rapidi](#possibilità-per-hotfix-rapidi)
-   - [Utilizzo di un Monorepo](#utilizzo-di-un-monorepo)
-   - [Standard per il Version Tagging](#standard-per-il-version-tagging)
-   - [Test Continuativi e Merge Requests Automatici](#test-continuativi-e-merge-requests-automatici)
-3. [Possibili Soluzioni](#possibili-soluzioni)
-4. [Workflow Finale](#workflow-finale)
+0. [Introduzione](#introduzione)  
+1. [Il Nostro Caso](#il-nostro-caso)  
+2. [Passi Già Compiuti e Dove Possiamo Migliorare](#passi-già-compiuti-e-dove-possiamo-migliorare)  
+   - [Separazione per Ambiente, Funzionalità e Correzioni](#separazione-per-ambiente-funzionalità-e-correzioni)  
+   - [Hotfix Rapidi](#hotfix-rapidi)  
+   - [Utilizzo di un Monorepo](#utilizzo-di-un-monorepo)  
+   - [Standard per il Version Tagging](#standard-per-il-version-tagging)  
+   - [Test Continuo e Merge Request Automatizzati](#test-continuo-e-merge-request-automatizzati)  
+3. [Possibili Soluzioni](#possibili-soluzioni)  
+4. [Workflow Finale](#workflow-finale)  
+5. [Casi Esempio](#casi-di-esempio)  
 
 ## Introduzione
 
-Questo repository è stato creato per spiegare e progettare quello che per me sarebbe il miglior, più semplice e veloce modo
-di organizzare il flusso di lavoro per una **web application a microservizi**.
+Questo repository è stato creato per spiegare e progettare quello che, secondo me, rappresenterebbe il modo migliore, più semplice e veloce per organizzare il workflow di un'applicazione **web a microservizi**.
 
-Lo sto creando anche per meglio interiorizzare il processo e delineare tutti i requisiti, problemi e soluzioni per il mio caso d'uso. Tutte le sezioni di questo documento sono soggette a modifiche.
+Sto anche creando questo documento per interiorizzare meglio il processo e delineare tutti i requisiti, problemi e soluzioni per il mio caso d'uso. Tutte le sezioni di questo documento sono soggette a modifiche.
 
-## Il nostro caso
+## Il Nostro Caso
 
-Abbiamo un'applicazione composta da **molti** microservizi (circa 40-50), e abbiamo bisogno di un flusso di lavoro semplice ed efficiente per:
+Abbiamo un'applicazione composta da **molti** microservizi (circa 40-50), e abbiamo bisogno di un workflow semplice ed efficiente per:
 
-- Gestire più ambienti di sviluppo (dev, staging, produzione)
-- Garantire la **migliore** qualità del codice possibile ad ogni passo del nostro SDLC
-- Rilasciare il nostro codice su staging/produzione e abilitare **rollbacks veloci e affidabili**
-- Fare hotfix al volo per risolvere bug urgenti o problemi in produzione
-- Automatizzare qualsiasi passo possibile lungo il percorso, per prevenire errori umani
-- Rendi la vita dei nostri sviluppatori più facile
+- Gestire diversi ambienti di sviluppo (dev, staging, produzione)  
+- Garantire la **migliore** qualità del codice possibile in ogni fase del nostro SDLC  
+- Distribuire il nostro codice su staging/produzione e consentire rollback **veloci e affidabili**  
+- Applicare hotfix al volo per risolvere bug o problemi urgenti in produzione  
+- Automatizzare ogni possibile passaggio lungo il processo, per prevenire errori umani  
+- Rendere la vita dei nostri sviluppatori più facile  
 
-## Passi già intrapresi e dove possiamo migliorare
+## Passi già compiuti e dove possiamo migliorare
 
-Abbiamo già intrapreso i seguenti passi:
+Abbiamo già implementato i seguenti passi:  
 
-- Pipeline CI/CD per l'integrazione automatica del codice e il rilascio
-- Versionamento semantico di base
+- Pipeline CI/CD per l'integrazione e la distribuzione automatica del codice  
+- Versionamento semantico di base  
 
-Nelle sezioni seguenti, considereremo tutti i miglioramenti possibili al nostro flusso di lavoro e i problemi che derivano dall'integrazione di questi processi.
+Nelle sezioni seguenti, prenderemo in considerazione tutti i possibili miglioramenti del nostro workflow e i problemi derivanti dall'integrazione di questi processi.
 
-### Separazione per ambiente, funzionalità e fix
+### Separazione per ambiente, funzionalità e correzioni
 
-Separando i nostri rami per ambiente (un ramo per dev, un ramo per staging, un ramo per produzione), possiamo guardare direttamente al codice che gira sui diversi ambienti, rendendo più facile il debug e il tracciamento dei problemi.
+Separando i branch per ambiente (un branch per dev, uno per staging e uno per produzione), possiamo osservare il codice che gira direttamente nei diversi ambienti, facilitando il debug e il tracciamento dei problemi.  
 
-- Creare un ramo per ogni funzionalità E fix/hotfix può migliorare il nostro flusso di lavoro. Quando uniamo questi rami nel ramo principale, dovremmo mantenere la cronologia Git e non unire tutti i commit, per fornire una comprensione più chiara di ogni fase del nostro ciclo.
-  In caso di problemi, è più facile fare il debug e risolverli.
-- Ogni ramo dovrebbe riflettere direttamente il codice che gira sull'ambiente corrispondente. Questo approccio consente anche di fare hotfix in ambienti non dev come la produzione e staging.
+- Creare un branch per ogni funzionalità **e** correzione/hotfix potrebbe migliorare il nostro workflow. Durante il merge di questi branch nel branch principale, dovremmo mantenere la cronologia Git senza fare squash dei commit per fornire una comprensione più chiara di ogni fase del ciclo. In caso di problemi, è più facile eseguire il debug e risolverli.  
+- Ogni branch dovrebbe riflettere direttamente il codice in esecuzione nell'ambiente corrispondente. Questo approccio semplifica anche gli hotfix in ambienti non di sviluppo come produzione e staging.  
 
-### Possibilità per hotfix rapidi
+### Hotfix Rapidi
 
-Abbiamo bisogno di introdurre la possibilità di fare correzioni rapide nel caso in cui troviamo un bug critico in qualsiasi sezione del nostro SDLC.
-Potremmo rendere il processo CI/CD più semplice per un rilascio più veloce, saltando direttamente i nostri ambienti dev o staging.
+Dobbiamo introdurre la possibilità di applicare rapidamente correzioni nel caso in cui troviamo un bug critico in qualsiasi sezione del nostro SDLC. Potremmo rendere più semplice il processo CI/CD per distribuzioni rapide, saltando direttamente gli ambienti dev o staging.
 
-### Utilizzo di un monorepo
+### Utilizzo di un Monorepo
 
-Nel mio caso, il progetto è diviso in _diversi_ repository, anche se i microservizi sono strettamente interconnessi tra loro. Potremmo migliorare il nostro flusso di lavoro creando un monorepo per il nostro progetto, anche se questo non è privo di svantaggi. Non usare un monorepo pone anche la sfida di tracciare le dipendenze (sia esterne che interne).
+Nel nostro caso, il progetto è suddiviso in **diversi** repository, anche se i microservizi sono strettamente interconnessi tra loro. Potremmo migliorare il nostro workflow utilizzando un monorepo per il nostro progetto, anche se ciò comporta alcuni svantaggi. Non utilizzare un monorepo rappresenta una sfida per tracciare le dipendenze (sia esterne che interne).  
 
-- Un approccio ibrido valido potrebbe essere quello di **tenere le nostre dipendenze e librerie condivise in un monorepo** per tracciarle. Questo semplificherebbe il tracciamento e l'aggiornamento delle versioni delle nostre dipendenze. Tramite l'uso di un bot autenticato su un registro o repository privato, potremmo automatizzare il processo di aggiornamento delle dipendenze di ogni microservizio senza preoccupazioni, definendo possibili problemi di sicurezza legati a dipendenze vulnerabili.
+- Un approccio ibrido valido potrebbe essere quello di **conservare le nostre dipendenze e librerie condivise in un monorepo** per tracciarle. Ciò semplificherebbe il tracciamento e l'aggiornamento delle versioni delle dipendenze. Attraverso l'uso di un bot autenticato su un registro o repository privato, potremmo automatizzare il processo di aggiornamento delle dipendenze di ciascun microservizio senza preoccupazioni, eliminando possibili problemi di sicurezza derivanti da dipendenze vulnerabili lungo il percorso.  
 
-### Standard per il version tagging
+### Standard per il Version Tagging
 
-Abbiamo bisogno di essere allineati sullo standard per il version tagging. Potremmo utilizzare
-[**Semantic Versioning**](https://semver.org/). Ecco una breve descrizione su come funzionerebbe per noi.
+### Standard per il Version Tagging
 
-- Nome versione **X.Y.Z**, dove
-  - **X** DEVE essere incrementato se vengono introdotte modifiche non compatibili con la versione precedente nell'API pubblica. PUÒ anche includere modifiche di livello minore o patch. Le versioni patch e minor devono essere azzerate quando viene incrementata la versione principale.
-  - **Y** DEVE essere incrementato se vengono introdotte nuove funzionalità compatibili con la versione precedente nell'API pubblica. DEVE essere incrementato se qualsiasi funzionalità dell'API pubblica è contrassegnata come obsoleta. PUÒ essere incrementato se vengono introdotte funzionalità sostanziali o miglioramenti nel codice privato. PUÒ includere modifiche di patch. La versione patch DEVE essere azzerata quando viene incrementata la versione minor.
-  - **Z** DEVE essere incrementato se vengono introdotte solo correzioni di bug compatibili con la versione precedente. Una correzione di bug è definita come una modifica interna che risolve comportamenti errati.
-    Questo potrebbe essere facilmente RISERVATO per **hotfix** su staging o produzione.
-- Etichettare le nostre versioni in base all'ambiente in cui vengono rilasciate potrebbe anche essere preso in considerazione (per esempio v0.0.1-staging), sebbene potrebbe causare confusione quando si applicano gli hotfix e si tracciano le dipendenze. **Semantic Versioning** dovrebbe essere sufficiente, e fornisce facilmente al team una comprensione di quale versione del nostro codice è in esecuzione. I task di Gradle/Maven o le pipeline CI/CD per l'aggiornamento automatico delle versioni devono essere scritti per ridurre gli errori umani.
-  L'uso di problemi GitLab, rilasci e milestone per tracciare i nostri rilasci/hotfix potrebbe anche migliorare il nostro flusso di lavoro fornendo una prospettiva chiara e diretta sullo stato del nostro codice e sui problemi urgenti.
-- Al momento, non stiamo usando il version tagging per il nostro chart finale Helm. Penso che dovremmo iniziare a farlo per tenere traccia meglio delle nostre modifiche e per abilitare rollback più facili.
+Dobbiamo allinearci su uno standard per il version tagging. Potremmo utilizzare [**Semantic Versioning**](https://semver.org/). Ecco una breve descrizione di come funzionerebbe per noi.  
 
-### Test Continuativi e Merge Requests Automatici
+- **X.Y.Z**, dove:
+  - **X** deve essere incrementato in caso di modifiche retroincompatibili nell'API pubblica.
+  - **Y** deve essere incrementato per nuove funzionalità retrocompatibili o funzionalità deprecate.
+  - **Z** deve essere incrementato per bugfix retrocompatibili.  
 
-I nostri processi CI/CD potrebbero essere migliorati per eseguire test su OGNI ramo e Merge Request. Questo dovrebbe individuare bug ed errori di build prima, migliorando la qualità del codice in ogni fase del percorso (anche se ciò comporta maggiori costi riguardo a runner e computazione). Le Merge Requests dovrebbero assicurarsi che il codice superi un controllo di qualità, e solo allora venga unito. Dal dev allo staging può essere automatico, ma dallo staging alla produzione possiamo richiedere un input manuale.
+Usare il tagging per ambiente (es. `v0.0.1-staging`) potrebbe essere considerato, anche se rischierebbe di creare confusione durante l'applicazione di hotfix.  
 
-## Possibili Soluzioni
+L'utilizzo del **Semantic Versioning** dovrebbe essere sufficiente per fornire al team una chiara comprensione della versione del codice in esecuzione. Task automatizzati in Gradle/Maven o pipeline CI/CD per incrementare automaticamente le versioni DEVONO essere creati per ridurre al minimo gli errori umani.  
 
-Questa è una bozza su come affronterei tutti i problemi considerati sopra:
+Inoltre, l'utilizzo di GitLab Issues, Releases e Milestones per tracciare rilasci e hotfix potrebbe migliorare il nostro flusso di lavoro fornendo una visione chiara e diretta sullo stato del nostro codice e sui problemi urgenti.  
 
-1. **Separazione dei rami per ambiente, funzionalità** - crea un ramo per ogni ambiente (dev, staging, produzione), funzionalità e hotfix.
-   Modifica i nostri processi CI/CD per adattarli a ogni ramo, per legare direttamente i nostri rami agli ambienti.
-   - Strumenti automatici per la promozione a staging o produzione devono essere creati o recuperati per ridurre gli errori umani e per tracciare meglio i nostri cambiamenti.
-   - I rami hotfix devono seguire questa convenzione: `hotfix/<ISSUE_ID>`
-2. **Processo CI/CD più semplice per gli hotfix** - crea un processo CI/CD più semplice per gli hotfix. Etichettando un commit su staging o produzione con _hotfix_ verrà automaticamente
-   incrementata la versione minor e poi il codice verrà rilasciato una volta che i test sono passati.
-3. **Organizzazione delle librerie interne e delle dipendenze in un monorepo** - questo migliorerebbe il loro tracciamento e ridurrebbe gli errori. Ciò richiederebbe molto sforzo al momento.
-4. **Utilizzo di Semantic Versioning** - utilizzare semantic versioning per tracciare le modifiche del nostro codice, usando Z (X.Y.Z) solo per gli hotfix.
-   Creazione di task Maven/Gradle e pipeline CI/CD per l'aggiornamento automatico delle versioni dei nostri microservizi e dei chart Helm.
-5. **Abilitazione del processo CI/CD ad ogni passo del percorso** - eseguire test e build per OGNI ramo per individuare i bug prima.
-6. **Utilizzo di ArgoCD e RenovateBot** - configurare _ArgoCD_ per osservare il nostro template finale Helm (e fare il commit del nostro
-   template Helm ogni passo del percorso in un repository) renderebbe più facili i rollback, e fornirebbe una comprensione più chiara e veloce dello stato
-   attuale del nostro codice. L'utilizzo di _ArgoCD_ favorisce anche (**GitOps**)[https://www.redhat.com/en/topics/devops/what-is-gitops#gitops-workflows].
-   L'utilizzo di _RenovateBot_ sembra anche essenziale per tracciare tutte le nostre dipendenze e individuare eventuali problemi di sicurezza,
-   migliorando la sicurezza della nostra applicazione e riducendo gli errori umani, mantenendo allineato ogni microservizio.
-   - Un lavoro notturno di Renovate o il suo deployment su un pod Kubernetes o macchina virtuale è sufficiente e una soluzione a basso costo.
+Attualmente non utilizziamo il version tagging per il nostro Helm final chart. Penso che dovremmo iniziare a farlo per tracciare meglio i cambiamenti e abilitare rollback più semplici.
+
+
+## Test Continuo e Merge Request Automatizzate
+
+I nostri processi CI/CD potrebbero essere migliorati eseguendo test su **ogni** branch e Merge Request. Questo ci permetterebbe di identificare bug e problemi di build in anticipo, migliorando la qualità del codice in ogni fase del ciclo di vita (anche se ciò comporta costi aggiuntivi per runner e risorse computazionali).  
+
+Le Merge Request dovrebbero garantire che il codice superi un "quality gate" prima di essere accettato.  
+
+- Da `dev` a `staging` il processo potrebbe essere automatico.  
+- Da `staging` a `production` richiedere una revisione manuale.
+
+---
+
+## Soluzioni Possibili
+
+Questo è un abbozzo di come affrontare i problemi descritti:
+
+1. **Separazione dei branch per ambiente e funzionalità**  
+   Creare branch per ogni ambiente (`dev`, `staging`, `production`), feature e hotfix.  
+   Modificare i processi CI/CD per adattarli ai branch, collegando direttamente i branch agli ambienti.  
+   - Strumenti automatici per la promozione tra ambienti (staging → production) dovrebbero essere costruiti o adottati per ridurre errori umani e tracciare meglio le modifiche.
+   - I branch hotfix dovrebbero seguire questa convenzione: `hotfix/<ISSUE_ID>`.
+     - Problema attuale: il frontend necessita che il backend sia funzionante, quindi le feature in sviluppo attivo potrebbero dover essere mergeate su `dev` affinché il frontend possa interagire con esse. È necessaria una soluzione migliore.
+
+2. **Processo CI/CD semplificato per gli hotfix**  
+   Creare un processo CI/CD più rapido per gli hotfix. Taggare un commit su `staging` o `production` con _hotfix_ dovrebbe incrementare automaticamente la minor version e distribuire il codice una volta superati i test.
+
+3. **Organizzazione delle librerie e dipendenze interne in un monorepo**  
+   Questo migliorerebbe il tracciamento e ridurrebbe gli errori, ma richiederebbe uno sforzo iniziale significativo.
+
+4. **Utilizzo del Semantic Versioning**  
+   Tracciare i cambiamenti del codice utilizzando il Semantic Versioning, riservando `Z` (X.Y.Z) esclusivamente agli hotfix.  
+   Creazione di task Maven/Gradle e pipeline CI/CD per l’incremento automatico delle versioni dei microservizi e dei chart Helm.
+
+5. **Abilitare processi CI/CD in ogni fase**  
+   Eseguire test e build su ogni branch e Merge Request per individuare bug precocemente.
+
+6. **Utilizzo di ArgoCD e RenovateBot**  
+   - Configurare **ArgoCD** per osservare i template Helm finali, impegnandoli in un repository per rendere i rollback più semplici.  
+     L’utilizzo di ArgoCD promuove anche [**GitOps**](https://www.redhat.com/en/topics/devops/what-is-gitops#gitops-workflows).
+   - Configurare **RenovateBot** per monitorare le dipendenze, segnalare vulnerabilità e mantenere i microservizi aggiornati.  
+     - Un job notturno di Renovate o la sua esecuzione in un pod Kubernetes è sufficiente e a basso costo.
+
+---
 
 ## Workflow Finale
 
-Ecco il processo SDLC proposto:
+### 1. **Sviluppo delle funzionalità**
 
-1. **Sviluppo delle funzionalità**
+- I developer creano branch di funzionalità: `feature/<nome-funzionalità>`.
+- CI esegue test unitari, analisi statica e build sul branch.
+- A completamento, viene creata una Merge Request verso il branch `dev`.
+- CI valida la Merge Request con controlli di qualità, test e build.
 
-   - Gli sviluppatori creano rami per le funzionalità: `feature/<nome-funzionalità>`.
-   - CI esegue test unitari, analisi statica e build per il ramo.
-   - Al termine, crea una Merge Request al ramo `dev`.
-   - CI convalida la Merge Request: controlli di qualità del codice, test e build.
+```mermaid
+graph TD;
+    A[Branch Feature Creato] --> B[CI Esegue Test & Build]
+    B --> C[Merge Request su dev]
+    C --> D[CI Valida MR]
+```
 
-2. **Ambiente di sviluppo**
+2. **Ambiente di Development**
 
-   - Le funzionalità unite vengono distribuite su `dev` automaticamente.
-   - Le pipeline CI/CD eseguono test di integrazione, test end-to-end, incremento versione e deployment.
-   - I bug vengono risolti nei rami `dev` o `fix/<id-issue>`.
+   - Feature mergiate su `dev` sono deployate automaticamente.
+   - CI pipelines eseguono integration tests, end-to-end tests, version bumping, e deployment.
+   - Bug trovati sono sistemati su branch di `dev` o `fix/<issue-id>`.
 
-3. **Ambiente di staging**
+```mermaid
+graph TD;
+    A[Features mergiate su dev] --> B[CI/CD Deploy to dev]
+    B --> C[Integration & E2E Tests]
+    C --> D[Bug fix su dev o fix Branches]
+```
 
-   - Le funzionalità considerate stabili vengono promosse a `staging` tramite Merge Request.
-   - CI/CD distribuisce su staging ed esegue i test.
-   - Viene eseguita una QA manuale e vengono preparate le note di rilascio.
+3. **Ambiente di Staging**
 
-4. **Ambiente di produzione**
+   - Features stabili sono "promosse" a `staging` attraverso una Merge Request da `dev` a `staging` branch.
+   - CI/CD schiera su staging ed esegue i test.
+   - QA manuale, preparazione delle release notes.
+  
+```mermaid
+graph TD;
+    A[Merge Request to staging] --> B[CI Runs Tests & Builds]
+    B --> C[If Tests Are Successful, Merge To Staging Automatically]
+    C --> D[Manual QA & Release Notes]
+```
 
-   - Le modifiche approvate vengono unite a `production` tramite Merge Request.
-   - CI/CD distribuisce su produzione con un tag di versione semantico (ad esempio, `vX.Y.Z`).
-   - I sistemi di monitoraggio e logging garantiscono la stabilità.
+4. **Ambiente di Produzione**
 
-5. **Processo di Hotfix**
+   - I cambiamenti approvati vengono mergiati su `production` attraverso una Merge Request da `staging` a `production`.
+   - CI/CD pipeline schierano il codice su produzione solo dopo che i test sono andati a buon fine e un approvazione manuale.
+   - Monitoramento dei log e della salute dei sistemi per verificare che tutto sia andato a buon fine.
 
-   - Per problemi critici, crea `hotfix/<id-issue>` da `production`.
-   - CI convalida e distribuisce direttamente su produzione dopo che i test sono passati.
-   - L'hotfix viene ripristinato su `staging` e `dev` per sincronizzare gli ambienti.
+```mermaid
+graph TD;
+    A[Merge Request to Production] --> B[CI Runs Tests & Builds]
+    B --> C[If Tests Are Succesful, Mark As Ready To Merge]
+    C --> D[Manual Approval To Merge]
+    D --> E[Monitoring and logging]
+```
+
+5. **Hotfix Process**
+
+   - Per problemi e bug urgenti, creare una branch `hotfix/<issue-id>` da `production`.
+   - CI/CD pipelines validano e schierano direttamente su `production` dopo che i test sono andati a buon fine, effettuando il bumping delle versioni.
+   - Hotfix viene mergiato successivamente su `staging` e `dev` per sincronizzare gli environment.
+
+```mermaid
+graph TD;
+    A[Identify Critical Issue] --> B[Create Hotfix Branch from Production]
+    B --> C[Apply Fix & Run Local Tests]
+    C --> D[CI Validates & Deploys to Production If Tests Are Passed, Bumping Versions]
+    D --> E[Backport Fix to Staging & Dev]
+```
 
 6. **Gestione delle dipendenze**
 
-   - Utilizza RenovateBot per gli aggiornamenti delle dipendenze in un monorepo condiviso.
-   - Aggiornamenti automatici delle dipendenze ogni notte o continuamente.
+   - Usare RenovateBot per aggiornamento delle dipendendenze dei microservizi e delle librerie.
+   - Le dipendenze dovrebbero essere mantenute in una monorepo o artifact registry osservati da RenovateBot.
 
-7. **Meccanismo di rollback**
+```mermaid
+graph TD;
+    A[RenovateBot Observes Monorepo Or Registry] --> B[Automatic Updates For Microservices Overnight Or Constantly]
+```
 
-   - ArgoCD traccia i template Helm e i commit per un rollback facile.
-   - Le distribuzioni fallite possono essere ripristinate allo stato precedente funzionante.
+6.5 **Gestione delle dipendenze in caso di hotfix**
 
-8. **Gestione delle versioni**
+   - Triggerare un RenovateBot job per aggiornare le dipendenze degli environment antecedenti.
+   - Il job deve essere triggerato automaticamente quando la Merge Request dell'hotfix è andata a buon fine.
 
-   - Semantic Versioning: incrementa il patch per gli hotfix, il minor per le nuove funzionalità, il major per i cambiamenti incompatibili.
-   - CI automatizza gli aggiornamenti delle versioni e i tag di rilascio.
+```mermaid
+graph TD;
+   A[Hotfix Is Made On Staging Or Prod] --> B[Merge Request Merges Successfully]
+   B --> C[Backport Merge To Staging & Dev] --> D[Trigger RenovateBot To Update Dependencies For All Repos In The Environment]
+```
 
-9. **Miglioramento Continuo**
-   - Tutti i passi vengono registrati in GitLab Issues e Milestones.
-   - Retrospettive regolari per perfezionare i flussi di lavoro.
+7. **Meccanismo di Rollback**
+
+   - ArgoCD traccia gli Helm templates e i commit per un rollback facile.
+   - Deployment falliti possono essere facilmente revertati all'ultima versione stabile.
+
+```mermaid
+graph TD;
+    A[ArgoCD Tracks Helm Templates and Commits] --> B[Failed Deployment Detected]
+    B --> C[Revert to Last Successful State]
+```
+
+8. **Version Management**
+
+   - **Semantic Versioning**: Incrementa la patch per gli hotfix, il minor per nuove funzionalità e il major per modifiche retroincompatibili.
+   - La CI automatizza l'incremento delle versioni e i tag delle release seguendo il Semantic Versioning **X.Y.Z**, dove:
+     - **X** rappresenta una versione major, retroincompatibile con le API precedenti.
+     - **Y** rappresenta un aggiornamento retrocompatibile, che può includere correzioni o nuove funzionalità.
+     - **Z** rappresenta un bugfix o una correzione minore.
+  
+```mermaid
+graph TD;
+   A[Merge Request On Dev/Staging/Prod] --> B[CI/CD Automatic Version Bumping Based On Branch Name/Commit Tag]
+```
+
+9. **Continuous Improvement**
+   - Tutti gli step di hotfix e deployment dovrebbero essere loggati tramite GitLab issues e Milestones.
+   - Imparare dai propri errori e migliorare il workflow nel corso del tempo.
+
+
+# Casi di Esempio
+
+## Esempi di Hotfix
+
+### Scenario 1: Bug in una Libreria Condivisa (Impatta la Produzione)
+
+Un bug critico è stato scoperto in una libreria condivisa utilizzata da più microservizi. Questo bug sta impattando la produzione e deve essere risolto immediatamente.
+
+**Passaggi:**
+
+1. **Creare un Branch Hotfix**  
+   Creare un branch a partire dal branch `production`:  
+   `hotfix/library-bugfix-prod`.
+
+2. **Applicare la Correzione**  
+   Risolvere il bug nel repository della libreria condivisa. Assicurarsi che la modifica sia retrocompatibile, se possibile.
+
+3. **Testare Localmente**  
+   Eseguire test locali per tutti i servizi dipendenti utilizzando la libreria aggiornata.
+
+4. **Push sul Branch Hotfix**  
+   Effettuare il push delle modifiche sul branch hotfix. La CI valida la correzione con analisi statica, test unitari e pipeline di build.
+
+5. **Creare una Merge Request**  
+   Una volta finalizzate le modifiche, creare una Merge Request per unire `hotfix/library-bugfix-prod` a `production`.
+
+6. **Eseguire la CI**  
+   Le pipeline eseguono test e compilazione sulla Merge Request per garantire la qualità del codice. Se il codice soddisfa gli standard di qualità, unire con intervento manuale.
+
+7. **Distribuire in Produzione**  
+   La CI/CD incrementa la versione per l'hotfix (es. `v1.2.1`) e distribuisce la libreria aggiornata in produzione e nel nostro registro degli artefatti/monorepo.  
+   Utilizzare **ArgoCD** o un equivalente per tracciare e validare la distribuzione.
+
+8. **Portare la Correzione sui Branch Secondari**  
+   Unire automaticamente il branch hotfix nei branch `staging` e `dev` per sincronizzare tutti gli ambienti. Questo passaggio dovrebbe avvenire se la Merge Request è stata unita con successo.
+
+9. **Attivare RenovateBot**  
+   Attivare RenovateBot sia per `staging` che per `dev` per aggiornare le dipendenze dei microservizi. Le Merge Request devono essere automaticamente unite se i test sono positivi.
+
+---
+
+### Scenario 2: Bug in una Libreria Condivisa (Impatta lo Staging)
+
+**Descrizione:**  
+Un bug è stato rilevato in una libreria condivisa durante i test in staging. Questo bug deve essere corretto e validato prima di passare in produzione.
+
+**Passaggi:**
+
+1. **Creare un Branch Hotfix**  
+   Creare un branch a partire dal branch `staging`:  
+   `hotfix/library-bugfix-staging`.
+
+2. **Applicare la Correzione**  
+   Risolvere il problema nella libreria condivisa, assicurandosi che sia retrocompatibile, se possibile.
+
+3. **Testare Localmente**  
+   Eseguire test locali per tutti i servizi dipendenti utilizzando la libreria aggiornata.
+
+4. **Push sul Branch Hotfix**  
+   Effettuare il push delle modifiche sul branch hotfix. La CI valida la correzione con analisi statica, test unitari e pipeline di build.
+
+5. **Creare una Merge Request**  
+   Una volta finalizzate le modifiche, creare una Merge Request per unire `hotfix/library-bugfix-staging` a `staging`.
+
+6. **Eseguire la CI**  
+   Le pipeline eseguono test e compilazione sulla Merge Request per garantire la qualità del codice. Se il codice soddisfa gli standard di qualità, unire manualmente o automaticamente, poiché ci troviamo nell'ambiente di staging.
+
+7. **Distribuire in Staging**  
+   La CI/CD incrementa la versione per l'hotfix (es. `v1.2.1`) e distribuisce la libreria aggiornata in staging e nel nostro registro degli artefatti/monorepo.  
+   Utilizzare **ArgoCD** o un equivalente per tracciare e validare la distribuzione.
+
+8. **QA e Validazione**  
+   Eseguire QA manuale o automatizzato nell'ambiente di staging. Assicurarsi che non ci siano regressioni o effetti collaterali prima di procedere.
+
+9. **Portare la Correzione su Dev**  
+   Unire automaticamente il branch hotfix nel branch `dev` per sincronizzare staging e dev. Questo passaggio dovrebbe avvenire se la Merge Request è stata unita con successo.
+
+10. **Attivare RenovateBot**  
+    Attivare RenovateBot per l'ambiente di sviluppo per aggiornare le dipendenze dei microservizi. Le Merge Request devono essere automaticamente unite se i test sono positivi.
+
+---
+
+### Scenario 3: Bug in un Microservizio (Impatta la Produzione)
+
+**Descrizione:**  
+Un problema critico è stato scoperto in un microservizio in esecuzione in produzione. Questo problema richiede una correzione e distribuzione immediate.
+
+**Passaggi:**
+
+1. **Creare un Branch Hotfix**  
+   Creare un branch a partire dal branch `production`:  
+   `hotfix/ms-bugfix-prod`.
+
+2. **Applicare la Correzione**  
+   Risolvere il problema nel microservizio, assicurandosi che non introduca ulteriori modifiche incompatibili.
+
+3. **Testare Localmente**  
+   Eseguire test unitari e test di integrazione per il microservizio.
+
+4. **Push sul Branch Hotfix**  
+   Effettuare il push delle modifiche sul branch hotfix. La CI valida la correzione con analisi statica, test unitari e pipeline di build.
+
+5. **Creare una Merge Request**  
+   Una volta finalizzate le modifiche, creare una Merge Request per unire `hotfix/ms-bugfix-prod` a `production`.
+
+6. **Eseguire la CI**  
+   Le pipeline eseguono test e compilazione sulla Merge Request per garantire la qualità del codice. Se il codice soddisfa gli standard di qualità, unire con intervento manuale.
+
+7. **Distribuire in Produzione**  
+   La CI/CD incrementa la versione per l'hotfix (es. `v2.3.4`) e distribuisce il microservizio aggiornato in produzione.
+
+8. **Portare la Correzione su Staging e Dev**  
+   Unire il branch hotfix nei branch `staging` e `dev` per assicurare la sincronizzazione degli ambienti. Questo passaggio dovrebbe avvenire se la Merge Request è stata unita con successo.
+
+---
+
+### Scenario 4: Bug in un Microservizio (Impatta lo Staging)
+
+**Descrizione:**  
+Un bug è stato trovato in un microservizio durante i test in staging. È necessario risolverlo prima della promozione in produzione.
+
+**Passaggi:**
+
+1. **Creare un Branch Hotfix**  
+   Creare un branch a partire dal branch `staging`:  
+   `hotfix/ms-bugfix-staging`.
+
+2. **Applicare la Correzione**  
+   Risolvere il problema nel microservizio, assicurandosi che sia retrocompatibile e non introduca nuovi problemi.
+
+3. **Testare Localmente**  
+   Eseguire test unitari e test di integrazione per il microservizio.
+
+4. **Push sul Branch Hotfix**  
+   Effettuare il push delle modifiche sul branch hotfix. La CI valida la correzione con analisi statica, test unitari e pipeline di build.
+
+5. **Creare una Merge Request**  
+   Una volta finalizzate le modifiche, creare una Merge Request per unire `hotfix/ms-bugfix-staging` a `staging`.
+
+6. **Eseguire la CI**  
+   Le pipeline eseguono test e compilazione sulla Merge Request per garantire la qualità del codice. Se il codice soddisfa gli standard di qualità, unire con intervento manuale.
+
+7. **Distribuire in Staging**  
+   La CI/CD incrementa la versione per l'hotfix (es. `v2.3.4`) e distribuisce il microservizio aggiornato in staging.
+
+8. **Portare la Correzione su Dev**  
+   Unire automaticamente il branch hotfix nel branch `dev` per sincronizzare staging e dev.
+
+---
+
+**Nota:**  
+Si consiglia di registrare i progressi e gli esiti degli hotfix nelle Issue/Milestone di GitLab per tenere il team informato.
