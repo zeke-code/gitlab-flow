@@ -103,6 +103,8 @@ This is a draft about how I would deal with all the problems considered above:
    Modify our CI/CD processes to adapt to each branch, to directly link our branches to our environments.
    - Automatic tools for promotion to staging or production environments must be built or retrieved to reduce human errors and to track our changes way better.
    - Hotfix branches must follow this convention: `hotfix/<ISSUE_ID>`
+     - At the moment this particular step presents a problem for us: the frontend client needs the backend to be working, so features that are actively being developed
+       would need to be merged to dev so that the frontend can interact with it. We need to think about a better solution for this.
 2. **Easier CI/CD process for hotfixes** - create an easier CI/CD process for hotfixes. Tagging a commit on staging or production branch with _hotfix_ would automatically
    bump our minor version and then deploy the code once tests are passed.
 3. **Organization of internal libraries and dependencies in a monorepo** - this would improve their tracking and reduce errors. This would require a lot of effort at the moment.
@@ -127,17 +129,38 @@ Here’s the proposed SDLC process:
    - Upon completion, create a Merge Request to `dev` branch.
    - CI validates the Merge Request: code quality checks, tests, and build.
 
+```mermaid
+graph TD;
+    A[Feature Branch Created] --> B[CI Runs Tests & Builds]
+    B --> C[Merge Request to dev]
+    C --> D[CI Validates MR]
+```
+
 2. **Development Environment**
 
    - Merged features are deployed to `dev` automatically.
    - CI/CD pipelines run integration tests, end-to-end tests, version bumping, and deployment.
    - Bugs found are fixed in `dev` or `fix/<issue-id>` branches.
 
+```mermaid
+graph TD;
+    A[Features Merged to dev] --> B[CI/CD Deploy to dev]
+    B --> C[Integration & E2E Tests]
+    C --> D[Bugs Fixed in dev or fix Branches]
+```
+
 3. **Staging Environment**
 
    - Features deemed stable are promoted to `staging` via Merge Request.
    - CI/CD deploys to staging and runs tests.
    - Manual QA is performed, and release notes are prepared.
+  
+```mermaid
+graph TD;
+    A[Merge Request to staging] --> B[CI Runs Tests & Builds]
+    B --> C[If Tests Are Successful, Merge To Staging Automatically]
+    C --> D[Manual QA & Release Notes]
+```
 
 4. **Production Environment**
 
@@ -145,16 +168,48 @@ Here’s the proposed SDLC process:
    - CI/CD deploys to production with a semantic version tag (e.g., `vX.Y.Z`).
    - Monitoring and logging systems ensure stability.
 
+```mermaid
+graph TD;
+    A[Merge Request to Production] --> B[CI Runs Tests & Builds]
+    B --> C[If Tests Are Succesful, Mark As Ready To Merge]
+    C --> D[Manual Approval To Merge]
+    D --> E[Monitoring and logging]
+```
+
 5. **Hotfix Process**
 
    - For critical issues, create `hotfix/<issue-id>` from `production`.
    - CI validates and deploys directly to production after tests pass.
    - Hotfix is backported to `staging` and `dev` to sync environments.
 
+```mermaid
+graph TD;
+    A[Identify Critical Issue] --> B[Create Hotfix Branch from Production]
+    B --> C[Apply Fix & Run Local Tests]
+    C --> D[CI Validates & Deploys to Production If Tests Are Passed]
+    D --> E[Backport Fix to Staging & Dev]
+```
+
 6. **Dependency Management**
 
-   - Use RenovateBot for dependency updates in a shared monorepo.
-   - Automatic nightly or constant dependency upgrades.
+   - Use RenovateBot for dependency updates in a shared monorepo or an artifact registry.
+   - Automatic nightly or constant dependency upgrades for all microservices.
+
+```mermaid
+graph TD;
+    A[RenovateBot Updates Dependencies] --> B[Shared Monorepo Or Artifact Registry]
+    B --> C[Automatic Nightly Or Constant Updates]
+```
+
+6.5 **Dependency Management in case of a hotfix for library**
+
+   - Trigger a RenovateBot job to update dependencies for the preceding environments.
+
+```mermaid
+graph TD;
+   A[Hotfix Is Made On Staging Or Prod] --> B[Backport Merge To Staging & Dev]
+   B --> C[Trigger RenovateBot To Update Dependencies For All Repos In The Environment]
+```
 
 7. **Rollback Mechanism**
 
@@ -165,6 +220,11 @@ Here’s the proposed SDLC process:
 
    - Semantic Versioning: Increment patch for hotfixes, minor for new features, major for breaking changes.
    - CI automates version bumps and tags releases.
+  
+```mermaid
+graph TD;
+   A[Merge Request On Dev/Staging/Prod] --> B[CI/CD Automatic Version Bumping Based On Branch Name/Commit Tag]
+```
 
 9. **Continuous Improvement**
    - All steps logged in GitLab Issues and Milestones.
