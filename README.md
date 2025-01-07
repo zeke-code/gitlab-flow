@@ -204,17 +204,24 @@ graph TD;
 6.5 **Dependency Management in case of a hotfix for library**
 
    - Trigger a RenovateBot job to update dependencies for the preceding environments.
+   - Job should only be triggered when the Merge Request of the hotfix merged successfully.
 
 ```mermaid
 graph TD;
-   A[Hotfix Is Made On Staging Or Prod] --> B[Backport Merge To Staging & Dev]
-   B --> C[Trigger RenovateBot To Update Dependencies For All Repos In The Environment]
+   A[Hotfix Is Made On Staging Or Prod] --> B[Merge Request Merges Successfully]
+   B --> C[Backport Merge To Staging & Dev] --> D[Trigger RenovateBot To Update Dependencies For All Repos In The Environment]
 ```
 
 7. **Rollback Mechanism**
 
    - ArgoCD tracks Helm templates and commits for easy rollback.
    - Failed deployments can revert to the last successful state.
+
+```mermaid
+graph TD;
+    A[ArgoCD Tracks Helm Templates and Commits] --> B[Failed Deployment Detected]
+    B --> C[Revert to Last Successful State]
+```
 
 8. **Version Management**
 
@@ -251,15 +258,24 @@ A critical bug is discovered in a shared library used by multiple microservices.
 3. **Test Locally**  
    Run local tests for all dependent services using the updated library.
 
-4. **Run CI**  
-   Push changes to the hotfix branch. The CI pipeline validates the fix by running tests and static analysis.
+4. **Push on hotfix branch**  
+   Push changes to the hotfix branch. CI validates the fix with static analysis, unit tests, and build pipelines.
 
-5. **Deploy to Production**  
-   Tag the commit with a hotfix version (e.g., `v1.2.1`). CI/CD deploys the updated library to production.  
+5. **Create Merge Request**
+   Once changes are finalized, create a Merge Request that merges `hotfix/library-bugfix-prod` to `production`
+
+6. **Run CI**
+   Pipelines run tests and compilation on the merge request to ensure code quality. If code meets quality gate standards, merge upon manual intervention.
+
+8. **Deploy to Production**  
+   CI/CD bumps version for hotfix (e.g., `v1.2.1`) and deploys the updated library to production and our artifact registry/monorepo.
    Use **ArgoCD** or equivalent to track and validate deployment.
 
-6. **Backport Fix**  
-   Merge the hotfix branch automatically into both `staging` and `dev` branches to synchronize all environments.
+9. **Backport Fix**  
+   Merge the hotfix branch automatically into both `staging` and `dev` branches to synchronize all environments. This should be done if MR was merged successfully.
+
+10. **Trigger RenovateBot**
+    Trigger RenovateBot for both staging and dev to update microservices dependencies. Merge Requests should be automatically merged if tests are positive.
 
 ---
 
@@ -277,20 +293,30 @@ A bug is detected in a shared library during staging testing. This bug must be f
 2. **Apply Fix**  
    Fix the issue in the shared library and ensure backward compatibility if possible.
 
-3. **Run CI**  
-   Push changes to the hotfix branch. The CI pipeline validates the fix by running tests and static analysis.
+3. **Test Locally**  
+   Run local tests for all dependent services using the updated library.
 
-4. **Deploy to Staging**  
-   Tag the commit with a hotfix version (e.g., `v1.2.1-staging` or simply `v1.2.1`). CI/CD deploys the updated library to the staging environment.
+4. **Push on hotfix branch**  
+   Push changes to the hotfix branch. CI validates the fix with static analysis, unit tests, and build pipelines.
 
-5. **QA and Validation**  
+5. **Create Merge Request**
+   Once changes are finalized, create a Merge Request that merges `hotfix/library-bugfix-staging` to `staging`
+
+6. **Run CI**
+   Pipelines run tests and compilation on the merge request to ensure code quality. If code meets quality gate standards, merge upon manual intervention OR automatically since we're in staging environment.
+
+7. **Deploy to Staging**  
+   CI/CD bumps version for hotfix (e.g., `v1.2.1`) and deploys the updated library to staging and our artifact registry/monorepo.
+   Use **ArgoCD** or equivalent to track and validate deployment.
+
+8. **QA and Validation**  
    Perform manual or automated QA in the staging environment. Ensure there are no regressions or side effects before going forward.
 
-6. **Backport Fix**
-   Merge the hotfix branch automatically into `dev` branch to synchronize staging and dev environments.
+9. **Backport Fix**
+   Merge the hotfix branch automatically into `dev` branch to synchronize staging and dev environments. This should be done if MR was merged successfully.
 
-7. **Promote to Production**  
-   If validated, promote the change to the `production` branch and deploy it with a production-specific version tag (e.g., `v1.2.1`).
+10. **Trigger RenovateBot**
+    Trigger RenovateBot for dev environment to update microservices dependencies. Merge Requests should be automatically merged if tests are positive.
 
 ---
 
@@ -311,14 +337,20 @@ A critical issue is discovered in a single microservice running in production. T
 3. **Test Locally**  
    Run unit tests and integration tests for the microservice.
 
-4. **Run CI**  
+4. **Push on hotfix branch**  
    Push the changes to the hotfix branch. CI validates the fix with static analysis, unit tests, and build pipelines.
 
-5. **Deploy to Production**  
-   Tag the commit with a hotfix version (e.g., `v2.3.4`). CI/CD deploys the microservice to the production environment.
+5. **Create Merge Request**
+   Once changes are finalized, create a Merge Request that merges `hotfix/ms-bugfix-prod` to `production`.
 
-6. **Backport Fix**  
-   Merge the hotfix branch into `staging` and `dev` branches to ensure all environments are synchronized.
+6. **Run CI**
+   Pipelines run tests and compilation on the merge request to ensure code quality. If code meets quality gate standards, merge upon manual intervention.
+
+7. **Deploy to Production**  
+   CI/CD bumps version for hotfix (e.g., `v2.3.4`) and deploys the updated microservice to production.
+
+8. **Backport Fix**  
+   Merge the hotfix branch into `staging` and `dev` branches to ensure all environments are synchronized. This should be done if MR was merged successfully.
 
 ---
 
@@ -336,22 +368,25 @@ A bug is found in a microservice during staging testing. This needs a fix before
 2. **Apply Fix**  
    Fix the bug in the microservice. Ensure backward compatibility and no new issues.
 
-3. **Run CI**  
+3. **Test Locally**  
+   Run unit tests and integration tests for the microservice.
+
+4. **Push on hotfix branch**  
    Push the changes to the hotfix branch. The CI pipeline validates the fix with tests and builds.
 
-4. **Deploy to Staging**  
-   Tag the commit with a hotfix version (e.g., `v2.3.4-staging` or `v.2.3.4`). CI/CD deploys the fix to staging.
+5. **Create Merge Request**
+   Once changes are finalized, create a Merge Request that merges `hotfix/ms-bugfix-staging` to `staging`
 
-5. **QA Validation**  
-   Perform QA and automated tests in the staging environment. Ensure the issue is resolved before going forward.
+6. **Run CI**
+   Pipelines run tests and compilation on the merge request to ensure code quality. If code meets quality gate standards, merge upon manual intervention.
 
-6. **Backport Fix**
-   Merge the hotfix branch into `dev` to ensure both environments are synchronized.
+7. **Deploy to Staging**  
+   CI/CD bumps version for hotfix (e.g., `v2.3.4`) and deploys the updated microservice to staging.
 
-7. **Promote to Production**  
-   Once validated, promote the fix to the `production` branch. Tag it with the production-specific version (e.g., `v2.3.4`).
+8. **Backport Fix**
+   Merge automatically the hotfix branch into `dev` to ensure both environments are synchronized.
+
+---
 
 It would be optimal to follow these steps as well each time a hotfix is applied:
 - Log hotfix progress and outcomes in GitLab Issues/Milestones to keep the team informed.
-- If a hotfix fails in production, use ArgoCD’s rollback functionality to revert to the last stable state.
-- Document the root cause, fix, and verification steps for all hotfixes to ensure learning and prevent regressions.
