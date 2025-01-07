@@ -80,7 +80,6 @@ We need to be aligned on the standard for version tagging. We could utilize
   - **X** MUST be incremented if any backward incompatible changes are introduced to the public API. It MAY also include minor and patch level changes. Patch and minor versions MUST be reset to 0 when major version is incremented.
   - **Y** MUST be incremented if new, backward compatible functionality is introduced to the public API. It MUST be incremented if any public API functionality is marked as deprecated. It MAY be incremented if substantial new functionality or improvements are introduced within the private code. It MAY include patch level changes. Patch version MUST be reset to 0 when minor version is incremented.
   - **Z** MUST be incremented if only backward compatible bug fixes are introduced. A bug fix is defined as an internal change that fixes incorrect behavior.
-    This could be used very easily RESERVED for **hotfixes** on staging or production.
 - Tagging our versions based on the environment they are deployed in could also be considered (for example v0.0.1-staging), although it could cause possible
   confusions when applying hotfixes and tracking dependencies. **Semantic Versioning** should be enough, and it easily gives the team an understanding of
   which version of our code is running. Gradle/Maven tasks or CI/CD pipelines to automatically bump our versions MUST be written to reduce human errors.
@@ -192,13 +191,12 @@ graph TD;
 
 6. **Dependency Management**
 
-   - Use RenovateBot for dependency updates in a shared monorepo or an artifact registry.
-   - Automatic nightly or constant dependency upgrades for all microservices.
+   - Use RenovateBot for dependency updates of our microservices.
+   - Dependencies should be kept in a monorepo or a registry
 
 ```mermaid
 graph TD;
-    A[RenovateBot Updates Dependencies] --> B[Shared Monorepo Or Artifact Registry]
-    B --> C[Automatic Nightly Or Constant Updates]
+    A[RenovateBot Observes Monorepo Or Registry] --> B[Automatic Updates For Microservices Overnight Or Constantly]
 ```
 
 6.5 **Dependency Management in case of a hotfix for library**
@@ -226,7 +224,10 @@ graph TD;
 8. **Version Management**
 
    - Semantic Versioning: Increment patch for hotfixes, minor for new features, major for breaking changes.
-   - CI automates version bumps and tags releases.
+   - CI automates version bumps and tags releases following semantic versioning **X.Y.Z* where
+   -    - X is a major, incompatible version with precedent APIs
+        - Y is a retrocompatible update, can be fixes or new features.
+        - Z is a bugfix or minor fix. 
   
 ```mermaid
 graph TD;
