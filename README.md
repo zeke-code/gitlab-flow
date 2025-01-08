@@ -277,8 +277,9 @@ A critical bug is discovered in a shared library used by multiple microservices.
 
 9. **Backport Fix**  
    Merge the hotfix branch automatically into both `staging` and `dev` branches to synchronize all environments. This should be done if MR was merged successfully.
+   - If there are versions conflicts (for example on dev `v1.3.0` and on prod `v1.2.1`, a manual cherry pick or merge of the hotfix is required)
 
-10. **Trigger RenovateBot**
+11. **Trigger RenovateBot**
     Trigger RenovateBot for both staging and dev to update microservices dependencies. Merge Requests should be automatically merged if tests are positive.
 
 ---
@@ -317,9 +318,10 @@ A bug is detected in a shared library during staging testing. This bug must be f
    Perform manual or automated QA in the staging environment. Ensure there are no regressions or side effects before going forward.
 
 9. **Backport Fix**
-   Merge the hotfix branch automatically into `dev` branch to synchronize staging and dev environments. This should be done if MR was merged successfully.
+   Merge/cherry pick the hotfix branch into `dev` branch to synchronize staging and dev environments. This should be done if MR was merged successfully.
+   - If there are versions conflicts (for example on dev `v1.3.0` and on prod `v1.2.1`, a manual cherry pick or merge of the hotfix is required)
 
-10. **Trigger RenovateBot**
+11. **Trigger RenovateBot**
     Trigger RenovateBot for dev environment to update microservices dependencies. Merge Requests should be automatically merged if tests are positive.
 
 ---
@@ -355,6 +357,7 @@ A critical issue is discovered in a single microservice running in production. T
 
 8. **Backport Fix**  
    Merge the hotfix branch into `staging` and `dev` branches to ensure all environments are synchronized. This should be done if MR was merged successfully.
+   - If there are versions conflicts (for example on dev `v1.3.0` and on prod `v1.2.1`, a manual cherry pick or merge of the hotfix is required)
 
 ---
 
@@ -389,6 +392,7 @@ A bug is found in a microservice during staging testing. This needs a fix before
 
 8. **Backport Fix**
    Merge automatically the hotfix branch into `dev` to ensure both environments are synchronized.
+   - If there are versions conflicts (for example on dev `v1.3.0` and on prod `v1.2.1`, a manual cherry pick or merge of the hotfix is required)
 
 ---
 
