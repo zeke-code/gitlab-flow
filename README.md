@@ -277,11 +277,13 @@ Un bug critico è stato scoperto in una libreria condivisa utilizzata da più mi
    La CI/CD incrementa la versione per l'hotfix (es. `v1.2.1`) e distribuisce la libreria aggiornata in produzione e nel nostro registro degli artefatti/monorepo.  
    Utilizzare **ArgoCD** o un equivalente per tracciare e validare la distribuzione.
 
-8. **Portare la Correzione sui Branch Secondari**  
+8. **Portare la Correzione sui Branch degli altri ambienti**  
    Unire automaticamente il branch hotfix nei branch `staging` e `dev` per sincronizzare tutti gli ambienti. Questo passaggio dovrebbe avvenire se la Merge Request è stata unita con successo.
+   - Se sussistono dei conflitti di versione tra i diversi environment (ad esempio su dev v1.3.0 e su prod v1.2.1, un cherry pick o merge manuale dell'hotfix sarà richiesto)
 
-9. **Attivare RenovateBot**  
+10. **Attivare RenovateBot**  
    Attivare RenovateBot sia per `staging` che per `dev` per aggiornare le dipendenze dei microservizi. Le Merge Request devono essere automaticamente unite se i test sono positivi.
+   - RenovateBot in questo caso dovrà essere attivato soltanto per fare il bump **minore** degli hotfix, se le versioni sono allineate.
 
 ---
 
@@ -320,9 +322,11 @@ Un bug è stato rilevato in una libreria condivisa durante i test in staging. Qu
 
 9. **Portare la Correzione su Dev**  
    Unire automaticamente il branch hotfix nel branch `dev` per sincronizzare staging e dev. Questo passaggio dovrebbe avvenire se la Merge Request è stata unita con successo.
+   - Se sussistono dei conflitti di versione tra i diversi environment (ad esempio su dev v1.3.0 e su prod v1.2.1, un cherry pick o merge manuale dell'hotfix sarà richiesto)
 
-10. **Attivare RenovateBot**  
+11. **Attivare RenovateBot**  
     Attivare RenovateBot per l'ambiente di sviluppo per aggiornare le dipendenze dei microservizi. Le Merge Request devono essere automaticamente unite se i test sono positivi.
+    - RenovateBot in questo caso dovrà essere attivato soltanto per fare il bump **minore** degli hotfix, se le versioni sono allineate.
 
 ---
 
@@ -357,6 +361,7 @@ Un problema critico è stato scoperto in un microservizio in esecuzione in produ
 
 8. **Portare la Correzione su Staging e Dev**  
    Unire il branch hotfix nei branch `staging` e `dev` per assicurare la sincronizzazione degli ambienti. Questo passaggio dovrebbe avvenire se la Merge Request è stata unita con successo.
+   - Se sussistono dei conflitti di versione tra i diversi environment (ad esempio su dev v1.3.0 e su prod v1.2.1, un cherry pick o merge manuale dell'hotfix sarà richiesto)
 
 ---
 
@@ -391,6 +396,7 @@ Un bug è stato trovato in un microservizio durante i test in staging. È necess
 
 8. **Portare la Correzione su Dev**  
    Unire automaticamente il branch hotfix nel branch `dev` per sincronizzare staging e dev.
+   - Se sussistono dei conflitti di versione tra i diversi environment (ad esempio su dev v1.3.0 e su prod v1.2.1, un cherry pick o merge manuale dell'hotfix sarà richiesto)
 
 ---
 
