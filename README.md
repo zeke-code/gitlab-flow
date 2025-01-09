@@ -112,7 +112,7 @@ This is a draft about how I would deal with all the problems considered above:
 3. **Organization of internal libraries and dependencies in a monorepo** - this would improve their tracking and reduce errors. This would require a lot of effort at the moment.
 4. **Utilize Semantic Versioning** - utilizing semantic versioning to track our code changes, using Z (X.Y.Z) for hotfixes only.
    Creation of Maven/Gradle tasks and CI/CD pipelines for automatic version bumping of our microservices and Helm charts.
-5. **Enable CI/CD process every step of the way** - run tests and build process for EVERY branch and Merge Requests to catch bugs earlier.
+5. **Enable CI/CD process every step of the way** - run tests and build process for Merge Requests to catch bugs earlier.
 6. **Utilization of ArgoCD and RenovateBot** - setting up _ArgoCD_ to observe our Helm final template (and committing our
    helm template each step of the way into a repo) would make rollbacks easier, and it would provide a clearer and faster understanding of the current state
    of our code. The utilization of _ArgoCD_ also favors [**GitOps**](https://www.redhat.com/en/topics/devops/what-is-gitops#gitops-workflows).
@@ -141,7 +141,7 @@ graph TD;
 2. **Development Environment**
 
    - Merged features are deployed to `dev` automatically.
-   - CI/CD pipelines run integration tests, end-to-end tests, version bumping, and deployment.
+   - CI/CD pipelines run integration tests, end-to-end tests, and deployment.
    - Bugs found are fixed in `dev` or `fix/<issue-id>` branches.
 
 ```mermaid
@@ -154,7 +154,7 @@ graph TD;
 3. **Staging Environment**
 
    - Features deemed stable are promoted to `staging` via Merge Request.
-   - CI/CD deploys to staging and runs tests.
+   - CI/CD does version bumping, deploys to staging and runs tests.
    - Manual QA is performed, and release notes are prepared.
   
 ```mermaid
@@ -181,7 +181,7 @@ graph TD;
 5. **Hotfix Process**
 
    - For critical issues, create `hotfix/<issue-id>` from `production`.
-   - CI validates and deploys directly to production after tests pass.
+   - CI validates and deploys to production after tests pass and manual approval is given.
    - Hotfix is backported (merging hotfix branch) to `staging` and `dev` to sync environments.
 
 ```mermaid
@@ -228,7 +228,7 @@ graph TD;
 
    - Semantic Versioning: Increment patch for hotfixes, minor for new features, major for breaking changes.
    - CI automates version bumps and tags releases following semantic versioning **X.Y.Z* where
-   -    - X is a major, incompatible version with precedent APIs
+        - X is a major, incompatible version with precedent APIs
         - Y is a retrocompatible update, can be fixes or new features.
         - Z is a bugfix or minor fix. 
   
@@ -278,6 +278,7 @@ A critical bug is discovered in a shared library used by multiple microservices.
 9. **Backport Fix**  
    Merge the hotfix branch automatically into both `staging` and `dev` branches to synchronize all environments. This should be done if MR was merged successfully.
    - If there are versions conflicts (for example on dev `v1.3.0` and on prod `v1.2.1`, a manual cherry pick or merge of the hotfix is required)
+     - In this case, manual version tagging will be required. We would need to bump from `v1.3.0` to `v1.3.1`, to let Renovate update all microservices automatically.
 
 11. **Trigger RenovateBot**
     Trigger RenovateBot for both staging and dev to update microservices dependencies. Merge Requests should be automatically merged if tests are positive.
@@ -286,7 +287,7 @@ A critical bug is discovered in a shared library used by multiple microservices.
 
 ### Scenario 2: Bug in Shared Library (Affects Staging)
 
-**Description:**  
+**Description:**
 A bug is detected in a shared library during staging testing. This bug must be fixed and validated before moving to production.
 
 **Steps:**
@@ -320,6 +321,7 @@ A bug is detected in a shared library during staging testing. This bug must be f
 9. **Backport Fix**
    Merge/cherry pick the hotfix branch into `dev` branch to synchronize staging and dev environments. This should be done if MR was merged successfully.
    - If there are versions conflicts (for example on dev `v1.3.0` and on prod `v1.2.1`, a manual cherry pick or merge of the hotfix is required)
+      - In this case, manual version tagging will be required. We would need to bump from `v1.3.0` to `v1.3.1`, to let Renovate update all microservices automatically.
 
 11. **Trigger RenovateBot**
     Trigger RenovateBot for dev environment to update microservices dependencies. Merge Requests should be automatically merged if tests are positive.
@@ -358,6 +360,7 @@ A critical issue is discovered in a single microservice running in production. T
 8. **Backport Fix**  
    Merge the hotfix branch into `staging` and `dev` branches to ensure all environments are synchronized. This should be done if MR was merged successfully.
    - If there are versions conflicts (for example on dev `v1.3.0` and on prod `v1.2.1`, a manual cherry pick or merge of the hotfix is required)
+      - In this case, manual version tagging will be required. We would need to bump from `v1.3.0` to `v1.3.1`, to let Renovate update all microservices automatically.
 
 ---
 
@@ -393,6 +396,7 @@ A bug is found in a microservice during staging testing. This needs a fix before
 8. **Backport Fix**
    Merge automatically the hotfix branch into `dev` to ensure both environments are synchronized.
    - If there are versions conflicts (for example on dev `v1.3.0` and on prod `v1.2.1`, a manual cherry pick or merge of the hotfix is required)
+     - In this case, manual version tagging will be required. We would need to bump from `v1.3.0` to `v1.3.1`, to let Renovate update all microservices automatically.
 
 ---
 
