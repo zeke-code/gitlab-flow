@@ -159,7 +159,7 @@ graph TD;
   
 ```mermaid
 graph TD;
-    A[Merge Request to staging] --> B[CI Runs Tests & Builds]
+    A[Merge Request to staging] --> B[CI Runs Tests & Builds, does version bump as well]
     B --> C[If Tests Are Successful, Merge To Staging Automatically]
     C --> D[Manual QA & Release Notes]
 ```
